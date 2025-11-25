@@ -1,2 +1,1 @@
-# account-frontend
-Pdnode Acccount Front-end
+# Pdnode Account Frontend
