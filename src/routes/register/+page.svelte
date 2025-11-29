@@ -3,13 +3,12 @@
     import Icon from "@iconify/svelte";
     import { tick } from 'svelte';
 
-
-    let username = $state("")
     let email = $state("")
     let verificationCode = $state("")
     let nextStepButtonDisabled = $state(false)
-
+    let emailInput: HTMLInputElement;
     let type: null | string = $state("verifyEmail")
+    let form: HTMLFormElement;
 
     afterNavigate(async () => {
         const queryString = window.location.search;
@@ -34,6 +33,15 @@
         }
     })
 
+    const sendCode = () => {
+        if (!emailInput.checkValidity()){
+            form.reportValidity()
+            return
+        }
+
+        fetch("http://localhost:3333/email/send", {method: "POST"})
+    }
+
 </script>
 
 <svelte:head>
@@ -45,31 +53,17 @@
     <div class="bg-white max-w-md p-8 md:p-12 rounded-2xl shadow-xl w-full">
         <h3 class="text-3xl font-bold mb-6 text-center">Register</h3>
         
-        <form class="flex flex-col gap-4">
-            
-            <!-- <div class="flex flex-col gap-1">
-                <label for="username" class="font-medium text-gray-700">Username</label>
-                <input 
-                    id="username" 
-                    type="text" 
-                    placeholder="Enter your username"
-                    required 
-                    class="input"
-                    bind:value={username}
-                >
-            </div> -->
-
+        <form class="flex flex-col gap-4" bind:this={form}>
             <div class="flex flex-col">
                 <label for="email" class="font-medium text-gray-700">Email</label>
-                <div class="flex flex-row justify-center items-center">
+                <div class="flex flex-row justify-center items-center gap-1">
                     <label class="input validator join-item">
                         <Icon icon="mdi:email-outline" class="mr-1" />
-                        <input bind:value={email} type="email" placeholder="user@example.com" required />
+                        <input bind:this={emailInput} bind:value={email} type="email" placeholder="user@example.com" required />
                     </label>
-                    <button class="btn max-w-md join-item">Send Code</button>
+                    <button class="btn max-w-md join-item" onclick={sendCode} type="button">Send Code</button>
                 </div>
             </div>
-
             <div class="flex flex-col gap-1">
                 <label for="verification-code" class="font-medium text-gray-700">Email Verification Code</label>           
                 <label class="input w-full">
