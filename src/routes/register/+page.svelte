@@ -9,6 +9,9 @@
     let emailInput: HTMLInputElement;
     let type: null | string = $state("verifyEmail")
     let form: HTMLFormElement;
+    let isSendEmailDisabled: boolean = $state(false)
+    let message: string | null = $state(null)
+    let messageType: "err" | "succ" = $state("succ")
 
     afterNavigate(async () => {
         const queryString = window.location.search;
@@ -33,13 +36,49 @@
         }
     })
 
-    const sendCode = () => {
+    const sendCode = async () => {
+        isSendEmailDisabled = true
         if (!emailInput.checkValidity()){
             form.reportValidity()
+            isSendEmailDisabled = false
             return
         }
 
-        fetch("http://localhost:3333/email/send", {method: "POST"})
+        const res = await fetch("http://localhost:3333/email/send", {
+            method: "POST", 
+            body: JSON.stringify({email}),
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        })
+
+        interface ErrorsType {
+            message: string,
+            rule: string,
+            field: string | Array<String>
+        }
+
+        interface ResponseType {
+            errors?: Array<ErrorsType>
+            status?: string
+            message?: string
+        }
+        
+        const json: ResponseType = await res.json()
+
+        if (json.errors || json.status?.startsWith("err")){
+            console.log("Send Code Failed")
+            console.log("Errors: " +json.errors)
+            isSendEmailDisabled = false
+            messageType = "err"
+            message = "An error occurred while we were sending the verification code to your email address."
+            return
+        }else if (json.status?.startsWith("succ")){
+            isSendEmailDisabled = false
+            messageType = "succ"
+            message = "We have sent a verification code to your email address."
+        }
+
     }
 
 </script>
@@ -61,7 +100,13 @@
                         <Icon icon="mdi:email-outline" class="mr-1" />
                         <input bind:this={emailInput} bind:value={email} type="email" placeholder="user@example.com" required />
                     </label>
-                    <button class="btn max-w-md join-item" onclick={sendCode} type="button">Send Code</button>
+                    <button class="btn max-w-md join-item" onclick={() => sendCode()} type="button" disabled={isSendEmailDisabled} >
+                        {#if !isSendEmailDisabled}
+                            Send Code
+                        {:else}
+                            <span class="loading loading-spinner"></span>
+                        {/if}
+                    </button>
                 </div>
             </div>
             <div class="flex flex-col gap-1">
@@ -81,17 +126,21 @@
                 </label>
             </div>
 
-            <!-- <div class="flex flex-col gap-1">
-                <label for="password" class="font-medium text-gray-700">Password</label>
-                <input 
-                    id="password" 
-                    type="password" 
-                    placeholder="••••••••"
-                    required 
-                    minlength="8"
-                    class="input"
-                >
-            </div> -->
+            {#if message}
+                {#if messageType == 'succ'}
+                <div role="alert" class="alert alert-success alert-soft">
+                    <span>{message}</span>
+                </div>
+                {:else if messageType == "err"}
+                <div role="alert" class="alert alert-error alert-soft">
+                    <span>{message}</span>
+                </div>
+                {/if}
+            {/if}
+
+
+
+
 
             <button 
                 type="submit" 
