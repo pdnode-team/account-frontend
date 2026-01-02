@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { account, generateID, AppwriteErrorTypeMessages } from '$lib/appwrite';
+	import { account, AppwriteErrorTypeMessages } from '$lib/appwrite';
 
-	let name = $state('');
 	let email = $state('');
 	let password = $state('');
 	let errorMessage: null | string = $state(null);
@@ -16,7 +15,7 @@
 				goto('/');
 			})
 			.catch(() => {
-				// User not logged in, stay on the registration page
+				// User not logged in, stay on the login page
 			});
 	});
 
@@ -25,59 +24,35 @@
 		event.preventDefault();
 		submitDisabled = true;
 		try {
-			await account.create({
-				userId: generateID(),
-				name,
+			await account.createEmailPasswordSession({
 				email,
 				password
 			});
 
 			goto('/');
 		} catch (error: any) {
-			console.error('Registration error:', error);
+			console.error('Login error:', error);
 			const errorType = error.type as keyof typeof AppwriteErrorTypeMessages;
 			errorMessage =
-				AppwriteErrorTypeMessages[errorType] || 'An unexpected error occurred during registration.';
+				AppwriteErrorTypeMessages[errorType] || 'An unexpected error occurred during login.';
 			submitDisabled = false;
 		}
 	};
 </script>
 
 <svelte:head>
-	<title>Register | Pdnode Account</title>
-	<meta name="description" content="Pdnode Account Register Page" />
+	<title>Login | Pdnode Account</title>
+	<meta name="description" content="Pdnode Account Login Page" />
 </svelte:head>
 
 <div class="flex justify-center items-center w-full h-screen bg-gray-200">
 	<div class="bg-white max-w-md p-8 md:p-12 rounded-2xl shadow-xl w-full">
-		<h3 class="text-3xl font-bold mb-6 text-center">Register</h3>
+		<h3 class="text-3xl font-bold mb-6 text-center">Login</h3>
 
 		<form
 			class="flex flex-col gap-4 justify-center items-center"
 			onsubmit={(event) => handleSubmit(event)}
 		>
-			<label class="input validator">
-				<svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-					<g
-						stroke-linejoin="round"
-						stroke-linecap="round"
-						stroke-width="2.5"
-						fill="none"
-						stroke="currentColor"
-					>
-						<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-						<circle cx="12" cy="7" r="4"></circle>
-					</g>
-				</svg>
-				<input
-					type="text"
-					bind:value={name}
-					required
-					placeholder="Name"
-					minlength="2"
-					maxlength="30"
-				/>
-			</label>
 			<label class="input validator">
 				<svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
 					<g
@@ -118,7 +93,7 @@
 				/>
 			</label>
 
-      <a class="link text-xs" href="/login">Already have an account? Login here.</a>
+      <a class="link text-xs" href="/register">Don't have an account? Register here.</a>
 
 
       {#if errorMessage}
@@ -131,7 +106,7 @@
 				{#if submitDisabled}
 					<span class="loading loading-dots loading-md"></span>
 				{:else}
-					Register
+					Login
 				{/if}
 			</button>
 		</form>
