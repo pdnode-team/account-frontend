@@ -3,8 +3,7 @@ import { Client, Account, ID } from 'appwrite';
 
 export const client = new Client();
 
-client.setEndpoint(PUBLIC_APPWRITE_ENDPOINT).setProject(PUBLIC_APPWRITE_PROJECT_ID).setDevKey("4c4d39639b3fb5a838ef77a295792e74ea268a7f381a9f7ffb1e2600f34e0ce9b0d0caf0b13dbe805e96015bea05bfb3377991aa5bbb95b9ae3c25b651641ebb844fa67b8acf74410d054f209d9b6123a63f19538d3f6a58831a12a9a45e88ca00a6fa660ec53d773dc5e8ad91c76a78929ac909127ed9c5b1bf627061b1b4aa");
-
+client.setEndpoint(PUBLIC_APPWRITE_ENDPOINT).setProject(PUBLIC_APPWRITE_PROJECT_ID)
 export const account = new Account(client);
 export const generateID = () => ID.unique();
 
